@@ -28,7 +28,6 @@ async function getPullRequestLabelNames(octokit) {
         });
 
     const pr = response.data.length > 0 && response.data[0];
-    console.log(pr);
     return pr ? pr.labels.map((label) => label.name || "") : [];
 }
 
