@@ -16,7 +16,6 @@ async function run() {
 }
 
 async function getPullRequestLabelNames(octokit) {
-    console.log(github);
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
     const commit_sha = github.context.sha;
