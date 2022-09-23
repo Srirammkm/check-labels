@@ -12,7 +12,7 @@ async function run() {
         (label) => labelNames.findIndex((value) => label === value) >= 0
     );
     const services = [];
-    labelsName.forEach((value) => { 
+    labelNames.forEach((value) => { 
         if(value.startsWith("update-") && !value.endsWith("all")){
             services.push(value.replace("update-", ""));
         }
