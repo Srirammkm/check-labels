@@ -10,6 +10,10 @@ inputs:
 outputs:
   result: # id of output
     description: 'The result if given labels have be applied to the PR'
+  services:
+    description: 'The string of service name, e.g. authorization,business-entity'
+  labels:
+    description:  "The array of label name, e.g. '[\"label-1\", \"label-2\"]'"
 runs:
   using: 'node12'
   main: 'main.js'

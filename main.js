@@ -14,7 +14,7 @@ async function run() {
     const services = [];
     labelsName.forEach((value) => { 
         if(value.startsWith("update-") && !value.endsWith("all")){
-            services.push(value)
+            services.push(value.replace("update-", ""));
         }
     });
     core.setOutput("result", result);
