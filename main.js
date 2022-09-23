@@ -11,8 +11,15 @@ async function run() {
     const result = labels.every(
         (label) => labelNames.findIndex((value) => label === value) >= 0
     );
+    const services = [];
+    labelsName.forEach((value) => { 
+        if(value.startsWith("update-") && !value.endsWith("all")){
+            services.push(value)
+        }
+    });
     core.setOutput("result", result);
     core.setOutput("labels", labelNames);
+    core.setOutput("services",services.toString())
 }
 
 async function getPullRequestLabelNames(octokit) {
