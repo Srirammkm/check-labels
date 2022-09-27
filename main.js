@@ -17,9 +17,16 @@ async function run() {
             services.push(value.replace("update-", ""));
         }
     });
+    const ftBranch = [];
+    labelNames.forEach((value) => { 
+        if(value.startsWith("origin/")){
+            ftBranch.push(value);
+        }
+    });
     core.setOutput("result", result);
     core.setOutput("labels", labelNames);
     core.setOutput("services",services.toString())
+    core.setOutput("ft-branch", ftBranch.toString())
 }
 
 async function getPullRequestLabelNames(octokit) {
