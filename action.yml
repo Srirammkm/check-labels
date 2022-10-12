@@ -17,7 +17,7 @@ outputs:
   ft-branch:
     description: "Return the future toggle branch name"
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'main.js'
 branding:
   icon: 'check-circle'
