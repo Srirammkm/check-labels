@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 
 async function run() {
-    const token = core.getInput("github-token", { required: true });
+    const token = core.getInput("github-token", { required: true }); //ewfw
     const octokit = github.getOctokit(token);
 
     const labelNames = await getPullRequestLabelNames(octokit);
