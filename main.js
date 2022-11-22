@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const { Octokit } = require("@octokit/rest");
 
 async function run() {
     const token = core.getInput("github-token", { required: true }); //ewfw
@@ -16,6 +17,9 @@ async function run() {
         if(value.startsWith("update-") && !value.endsWith("all")){
             services.push(value.replace("update-", ""));
         }
+        if(value == "monthly-release"){
+
+        }
     });
     const ftBranch = [];
     labelNames.forEach((value) => { 
@@ -23,6 +27,35 @@ async function run() {
             ftBranch.push(value);
         }
     });
+    const octo = new Octokit({
+        auth: token,
+        });
+    async function test(file){
+        content = await octo.rest.repos.getContent({
+                    owner: "sriram-demo",
+                    repo: "demo",
+                    path: `taskdefinitions/${file}.json`
+                }).then(function(response){
+                    let data = response["data"]["content"];
+                    let buff = new Buffer.from(data, 'base64');
+                    let text = buff.toString('ascii');
+                    const json = JSON.parse(text);
+                    return json
+                });
+        return content
+    }
+    test("R2022.11.S").then(function(response){
+        var dict = {};
+        console.log(response["stages"])
+        const stages = response["stages"]
+        for (const index in stages) { 
+            console.log(stages[index])
+            test(stages[index]).then(function(response){
+                dict[stages[index]] = response
+                core.setOutput("commands", dict);
+            });
+          }
+    })
     core.setOutput("result", result);
     core.setOutput("labels", labelNames);
     core.setOutput("services",services.toString())
