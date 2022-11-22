@@ -16,7 +16,7 @@ outputs:
     description:  "The array of label name, e.g. '[\"label-1\", \"label-2\"]'"
   ft-branch:
     description: "Return the future toggle branch name"
-  commands:
+  jobs:
     description: "return commands"
 runs:
   using: 'node16'

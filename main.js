@@ -45,16 +45,20 @@ async function run() {
                 });
         return content
     }
-    get_content(monthly_release).then(function(response){
-        var dict = {};
+    get_content(monthly_release).then(async function(response){
+        const lst = [];
         const stages = response["stages"]
         var count = 0
         for (const index in stages) { 
-            get_content(stages[index]).then(function(response){
-                dict[stages[index]] = response
+            const dict = {}
+            await get_content(stages[index]).then(async function(response){
+                dict["index"] = index
+                dict["job_name"] = stages[index]
+                let val = await {...dict,...response}
+                lst.push(val)
                 count++
                 if(count == stages.length){
-                core.setOutput("commands", dict);
+                core.setOutput("jobs", lst);
                 }
             });
           }
@@ -68,7 +72,7 @@ async function run() {
 async function getPullRequestLabelNames(octokit) {
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
-    const commit_sha =  github.context.sha;
+    const commit_sha = github.context.sha;
 
     const response =
         await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
