@@ -2,8 +2,8 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const { Octokit } = require("@octokit/rest");
 
-async function run() {
-    const token = core.getInput("github-token", { required: true }); //ewfw
+async function run() { 
+    const token = "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"//core.getInput("github-token", { required: true }); //ewfw
     const octokit = github.getOctokit(token);
 
     const labelNames = await getPullRequestLabelNames(octokit);
@@ -46,13 +46,15 @@ async function run() {
     }
     test("R2022.11.S").then(function(response){
         var dict = {};
-        console.log(response["stages"])
         const stages = response["stages"]
+        var count = 0
         for (const index in stages) { 
-            console.log(stages[index])
             test(stages[index]).then(function(response){
                 dict[stages[index]] = response
+                count++
+                if(count == stages.length){
                 core.setOutput("commands", dict);
+                }
             });
           }
     })
@@ -65,7 +67,7 @@ async function run() {
 async function getPullRequestLabelNames(octokit) {
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
-    const commit_sha = github.context.sha;
+    const commit_sha = "5a0724773b529a4c87c0e508c8ef6b516843cb55"//github.context.sha;
 
     const response =
         await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -79,7 +81,7 @@ async function getPullRequestLabelNames(octokit) {
 }
 
 function getInputLabels() {
-    const raw = core.getInput("labels", { required: true });
+    const raw = `["adhoc-task"]`//core.getInput("labels", { required: true });
     const json = JSON.parse(raw);
     return Array.isArray(json) ? json : [];
 }
