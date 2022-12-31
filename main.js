@@ -108,9 +108,18 @@ async function getPullRequestLabelNames(octokit) {
 }
 
 function getInputLabels() {
-    const raw = core.getInput("labels", { required: false });
-    const json = JSON.parse(raw);
-    return Array.isArray(json) ? json : [];
+    const input_labels = core.getInput("labels", { required: false });
+    if(input_labels != ""){
+        const raw = input_labels
+        const json = JSON.parse(raw);
+        console.log("input lb "+input_labels)
+        return Array.isArray(json) ? json : [];
+    }else{
+        const raw = `["null"]`
+        const json = JSON.parse(raw);
+        console.log("input lb "+input_labels)
+        return Array.isArray(json) ? json : [];
+    }
 }
 
 run().catch((err) => {
