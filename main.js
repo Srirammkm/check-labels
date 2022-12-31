@@ -1,25 +1,25 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const { Octokit } = require("@octokit/rest");
+const YAML = require('yamljs');
 
 async function run() { 
     const token = core.getInput("github-token", { required: true });
     const octokit = github.getOctokit(token);
 
     const labelNames = await getPullRequestLabelNames(octokit);
-
+    
+    //getting input values
     const labels = getInputLabels();
+    const mr_file = core.getInput("release-file", { required: false });
+
     const result = labels.every(
         (label) => labelNames.findIndex((value) => label === value) >= 0
     );
     const services = [];
-    var monthly_release = "";
     labelNames.forEach((value) => { 
         if(value.startsWith("update-") && !value.endsWith("all")){
             services.push(value.replace("update-", ""));
-        }
-        if(value.startsWith("MR-")){
-            monthly_release = value.replace("MR-","");
         }
     });
     const ftBranch = [];
@@ -28,10 +28,28 @@ async function run() {
             ftBranch.push(value);
         }
     });
+
     const octo = new Octokit({
         auth: token,
         });
-    async function get_content(file){
+    async function get_mr_content(file){
+        content = await octo.rest.repos.getContent({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    path: `monthly-release/${file}`
+                }).then(function(response){
+                    let data = response["data"]["content"];
+                    let buff = new Buffer.from(data, 'base64');
+                    let text = buff.toString('ascii');
+                    console.log(text)
+                    const ystring = YAML.parse(text)
+                    const jsonStr = JSON.stringify(ystring);
+                    const json = JSON.parse(jsonStr)
+                    return json
+                });
+        return content
+    }
+    async function get_task_content(file){
         content = await octo.rest.repos.getContent({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
@@ -45,14 +63,15 @@ async function run() {
                 });
         return content
     }
-    if( monthly_release != ""){
-    get_content(monthly_release).then(async function(response){
+    if( mr_file != ""){
+    get_mr_content(mr_file).then(async function(response){
         const lst = [];
+        console.log(response["stages"])
         const stages = response["stages"]
         var count = 0
         for (const index in stages) { 
             const dict = {}
-            await get_content(stages[index]).then(async function(response){
+            await get_task_content(stages[index]).then(async function(response){
                 dict["index"] = index
                 dict["job_name"] = stages[index]
                 let val = await {...dict,...response}
@@ -89,7 +108,7 @@ async function getPullRequestLabelNames(octokit) {
 }
 
 function getInputLabels() {
-    const raw = core.getInput("labels", { required: true });
+    const raw = core.getInput("labels", { required: false });
     const json = JSON.parse(raw);
     return Array.isArray(json) ? json : [];
 }

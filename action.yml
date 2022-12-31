@@ -6,7 +6,10 @@ inputs:
     required: true
   labels:  # id of input
     description: "The array of label name, e.g. '[\"label-1\", \"label-2\"]'"
-    required: true
+    required: false
+  release-file:  # id of input
+    description: "Monthly Release file name"
+    required: false
 outputs:
   result: # id of output
     description: 'The result if given labels have be applied to the PR'
