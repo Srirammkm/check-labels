@@ -41,7 +41,6 @@ async function run() {
                     let data = response["data"]["content"];
                     let buff = new Buffer.from(data, 'base64');
                     let text = buff.toString('ascii');
-                    console.log(text)
                     const ystring = YAML.parse(text)
                     const jsonStr = JSON.stringify(ystring);
                     const json = JSON.parse(jsonStr)
@@ -66,7 +65,6 @@ async function run() {
     if( mr_file != ""){
     get_mr_content(mr_file).then(async function(response){
         const lst = [];
-        console.log(response["stages"])
         const stages = response["stages"]
         var count = 0
         for (const index in stages) { 
@@ -112,12 +110,10 @@ function getInputLabels() {
     if(input_labels != ""){
         const raw = input_labels
         const json = JSON.parse(raw);
-        console.log("input lb "+input_labels)
         return Array.isArray(json) ? json : [];
     }else{
         const raw = `["null"]`
         const json = JSON.parse(raw);
-        console.log("input lb "+input_labels)
         return Array.isArray(json) ? json : [];
     }
 }
