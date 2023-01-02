@@ -36,7 +36,7 @@ async function run() {
         content = await octo.rest.repos.getContent({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
-                    path: `monthly-release/${file}`
+                    path: `deployments/monthly-release/${file}`
                 }).then(function(response){
                     let data = response["data"]["content"];
                     let buff = new Buffer.from(data, 'base64');
@@ -52,7 +52,7 @@ async function run() {
         content = await octo.rest.repos.getContent({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
-                    path: `taskdefinitions/${file}.json`
+                    path: `deployments/taskdefinitions/${file}.json`
                 }).then(function(response){
                     let data = response["data"]["content"];
                     let buff = new Buffer.from(data, 'base64');
