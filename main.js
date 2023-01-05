@@ -4,22 +4,25 @@ const { Octokit } = require("@octokit/rest");
 const YAML = require('yamljs');
 
 async function run() { 
-    const token = core.getInput("github-token", { required: true });
+    const token =  core.getInput("github-token", { required: true });
     const octokit = github.getOctokit(token);
 
     const labelNames = await getPullRequestLabelNames(octokit);
     
     //getting input values
     const labels = getInputLabels();
-    const mr_file = core.getInput("release-file", { required: false });
 
     const result = labels.every(
         (label) => labelNames.findIndex((value) => label === value) >= 0
     );
     const services = [];
+    var monthly_release = "";
     labelNames.forEach((value) => { 
         if(value.startsWith("update-") && !value.endsWith("all")){
             services.push(value.replace("update-", ""));
+        }
+        if(value.startsWith("MR-")){
+            monthly_release = value.replace("MR-","");
         }
     });
     const ftBranch = [];
@@ -62,8 +65,8 @@ async function run() {
                 });
         return content
     }
-    if( mr_file != ""){
-    get_mr_content(mr_file).then(async function(response){
+    if( monthly_release != ""){
+    get_mr_content(monthly_release).then(async function(response){
         const lst = [];
         const stages = response["stages"]
         var count = 0
@@ -106,16 +109,9 @@ async function getPullRequestLabelNames(octokit) {
 }
 
 function getInputLabels() {
-    const input_labels = core.getInput("labels", { required: false });
-    if(input_labels != ""){
-        const raw = input_labels
-        const json = JSON.parse(raw);
-        return Array.isArray(json) ? json : [];
-    }else{
-        const raw = `["null"]`
-        const json = JSON.parse(raw);
-        return Array.isArray(json) ? json : [];
-    }
+    const raw = core.getInput("labels", { required: true });
+    const json = JSON.parse(raw);
+    return Array.isArray(json) ? json : [];
 }
 
 run().catch((err) => {

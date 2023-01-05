@@ -1,0 +1,63 @@
+name: "Working Set Validator"
+
+on:
+  pull_request:
+    paths:
+    - 'mdmnext-prod-*/env'
+    - 'mdmnext-stg-*/env'
+    - 'mdmnext-stage-*/env'
+    - 'mdmnext-prv-*/env'
+    branches:
+      - feature/ws-validate
+
+jobs:
+  getpod:
+    if: github.event_name == 'pull_request'
+    name: "Extract folder_id"
+    runs-on: self-hosted
+    outputs:
+      folder_id: ${{ steps.folder_id.outputs.folder_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2  
+        with:
+          ref: feature/ws-validate
+          fetch-depth: 0     
+          token: ${{ github.token }}   
+
+      - name: Get Pod ID
+        id: folder_id
+        run: |
+         ids=''
+         for i in `git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "env" |  awk -F '/' '{print $1}' | sort | uniq -u`
+         do
+         ids+={'"id":"'$i'"},'
+         done
+         ids=${ids%?}
+         echo $ids
+         echo ::set-output name=folder_id::{\"include\":[$ids]}
+        continue-on-error: false
+
+  validate:
+    if: github.event_name == 'pull_request'
+    name: "Validate Workingset"
+    strategy:
+      matrix: ${{ fromJson(needs.getpod.outputs.folder_id) }}
+    runs-on: ${{matrix.id}}
+    needs: getpod  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with: 
+          token: ${{ github.token }}    
+
+      - name: Validate Workingset
+        id: vws
+        env:
+          folder_id: ${{matrix.id}}
+          TERM: xterm
+        run: |
+         sudo chmod -R 777 ${{ github.workspace }}
+         echo test begins
+         cat $folder_id/env|grep WORKING_SET_BRANCH|awk -F '=' '{print $NF}'
+        continue-on-error: false
