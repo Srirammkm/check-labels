@@ -17,12 +17,19 @@ async function run() {
     );
     const services = [];
     var monthly_release = "";
+    var userconfirmation = "manual";
     labelNames.forEach((value) => { 
         if(value.startsWith("update-") && !value.endsWith("all")){
             services.push(value.replace("update-", ""));
         }
         if(value.startsWith("MR-")){
             monthly_release = value.replace("MR-","");
+        }
+        if(value === "manual"){
+            userconfirmation = "manual"
+        }
+        if(value === "auto"){
+            userconfirmation = "auto"
         }
     });
     const ftBranch = [];
@@ -88,8 +95,9 @@ async function run() {
     }
     core.setOutput("result", result);
     core.setOutput("labels", labelNames);
-    core.setOutput("services",services.toString())
-    core.setOutput("ft-branch", ftBranch.toString())
+    core.setOutput("services",services.toString());
+    core.setOutput("ft-branch", ftBranch.toString());
+    core.setOutput("userconfirmation", userconfirmation);
 }
 
 async function getPullRequestLabelNames(octokit) {

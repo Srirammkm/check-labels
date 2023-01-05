@@ -18,6 +18,8 @@ outputs:
     description: "Return the future toggle branch name"
   jobs:
     description: "return commands"
+  userconfirmation:
+    description: "returns type of deployment"
 runs:
   using: 'node16'
   main: 'main.js'
