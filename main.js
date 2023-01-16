@@ -4,7 +4,7 @@ const { Octokit } = require("@octokit/rest");
 const YAML = require('yamljs');
 
 async function run() { 
-    const token =  "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" //core.getInput("github-token", { required: true });
+    const token =  core.getInput("github-token", { required: true });
     const octokit = github.getOctokit(token);
 
     const labelNames = await getPullRequestLabelNames(octokit);
@@ -77,29 +77,8 @@ async function run() {
                 });
         return content
     }
-
-    if( monthly_release != ""){
-    path = `deployments/monthly-release/${monthly_release}`
-    get_task_list(path).then(async function(response){
-        const lst = [];
-        const stages = response["stages"]
-        var count = 0
-        for (const index in stages) { 
-            const dict = {}
-            await get_task_content(stages[index]).then(async function(response){
-                dict["index"] = index
-                dict["job_name"] = stages[index]
-                let val = await {...dict,...response}
-                lst.push(val)
-                count++
-                if(count == stages.length){
-                core.setOutput("jobs", lst);
-                }
-            });
-          }
-    })} else if( adhoc != "" ){
-        path = `deployments/adhoc-tasks/${adhoc}`
-        get_task_list(path).then(async function(response){
+    async function set_output_job(path){
+         await get_task_list(path).then(async function(response){
             const lst = [];
             const stages = response["stages"]
             var count = 0
@@ -117,6 +96,14 @@ async function run() {
                 });
               }
         })
+    }
+
+    if( monthly_release != ""){
+    path = `deployments/monthly-release/${monthly_release}`
+    set_output_job(path)
+    } else if( adhoc != "" ){
+        path = `deployments/adhoc-tasks/${adhoc}`
+        set_output_job(path)
     } else {
         core.setOutput("jobs", []);
     }
@@ -130,7 +117,7 @@ async function run() {
 async function getPullRequestLabelNames(octokit) {
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
-    const commit_sha = "50c3264a40bd3296323d41a24ebd82eb85d33e43" //github.context.sha;
+    const commit_sha = github.context.sha;
 
     const response =
         await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -144,7 +131,7 @@ async function getPullRequestLabelNames(octokit) {
 }
 
 function getInputLabels() {
-    const raw = `["adhoc"]` //core.getInput("labels", { required: true });
+    const raw = core.getInput("labels", { required: true });
     const json = JSON.parse(raw);
     return Array.isArray(json) ? json : [];
 }
