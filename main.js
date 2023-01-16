@@ -4,7 +4,7 @@ const { Octokit } = require("@octokit/rest");
 const YAML = require('yamljs');
 
 async function run() { 
-    const token =  core.getInput("github-token", { required: true });
+    const token =  "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" //core.getInput("github-token", { required: true });
     const octokit = github.getOctokit(token);
 
     const labelNames = await getPullRequestLabelNames(octokit);
@@ -17,13 +17,18 @@ async function run() {
     );
     const services = [];
     var monthly_release = "";
+    var adhoc = "";
     var userconfirmation = "manual";
+
     labelNames.forEach((value) => { 
         if(value.startsWith("update-") && !value.endsWith("all")){
             services.push(value.replace("update-", ""));
         }
         if(value.startsWith("MR-")){
             monthly_release = value.replace("MR-","");
+        }
+        if(value.startsWith("AH-")){
+            adhoc = value.replace("AH-","");
         }
         if(value === "manual"){
             userconfirmation = "manual"
@@ -42,11 +47,11 @@ async function run() {
     const octo = new Octokit({
         auth: token,
         });
-    async function get_mr_content(file){
+    async function get_task_list(path){
         content = await octo.rest.repos.getContent({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
-                    path: `deployments/monthly-release/${file}`
+                    path: path
                 }).then(function(response){
                     let data = response["data"]["content"];
                     let buff = new Buffer.from(data, 'base64');
@@ -72,8 +77,10 @@ async function run() {
                 });
         return content
     }
+
     if( monthly_release != ""){
-    get_mr_content(monthly_release).then(async function(response){
+    path = `deployments/monthly-release/${monthly_release}`
+    get_task_list(path).then(async function(response){
         const lst = [];
         const stages = response["stages"]
         var count = 0
@@ -90,7 +97,27 @@ async function run() {
                 }
             });
           }
-    })} else {
+    })} else if( adhoc != "" ){
+        path = `deployments/adhoc-tasks/${adhoc}`
+        get_task_list(path).then(async function(response){
+            const lst = [];
+            const stages = response["stages"]
+            var count = 0
+            for (const index in stages) { 
+                const dict = {}
+                await get_task_content(stages[index]).then(async function(response){
+                    dict["index"] = index
+                    dict["job_name"] = stages[index]
+                    let val = await {...dict,...response}
+                    lst.push(val)
+                    count++
+                    if(count == stages.length){
+                    core.setOutput("jobs", lst);
+                    }
+                });
+              }
+        })
+    } else {
         core.setOutput("jobs", []);
     }
     core.setOutput("result", result);
@@ -103,7 +130,7 @@ async function run() {
 async function getPullRequestLabelNames(octokit) {
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
-    const commit_sha = github.context.sha;
+    const commit_sha = "50c3264a40bd3296323d41a24ebd82eb85d33e43" //github.context.sha;
 
     const response =
         await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -117,7 +144,7 @@ async function getPullRequestLabelNames(octokit) {
 }
 
 function getInputLabels() {
-    const raw = core.getInput("labels", { required: true });
+    const raw = `["adhoc"]` //core.getInput("labels", { required: true });
     const json = JSON.parse(raw);
     return Array.isArray(json) ? json : [];
 }
