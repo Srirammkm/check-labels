@@ -121,7 +121,7 @@ async function getPullRequestLabelNames(octokit) {
 }
 
 function getInputLabels() {
-    const raw = core.getInput("labels", { required: true });
+    const raw = core.getInput("labels", { required: false });
     const json = JSON.parse(raw);
     return Array.isArray(json) ? json : [];
 }
