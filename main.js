@@ -5,6 +5,7 @@ const YAML = require('yamljs');
 
 async function run() { 
     const token =  core.getInput("github-token", { required: true });
+    const task_path = core.getInput("task-path", { required: false });
     const octokit = github.getOctokit(token);
 
     const labelNames = await getPullRequestLabelNames(octokit);
@@ -16,19 +17,11 @@ async function run() {
         (label) => labelNames.findIndex((value) => label === value) >= 0
     );
     const services = [];
-    var monthly_release = "";
-    var adhoc = "";
     var userconfirmation = "manual";
 
     labelNames.forEach((value) => { 
         if(value.startsWith("update-") && !value.endsWith("all")){
             services.push(value.replace("update-", ""));
-        }
-        if(value.startsWith("MR-")){
-            monthly_release = value.replace("MR-","");
-        }
-        if(value.startsWith("AH-")){
-            adhoc = value.replace("AH-","");
         }
         if(value === "manual"){
             userconfirmation = "manual"
@@ -98,12 +91,9 @@ async function run() {
         })
     }
 
-    if( monthly_release != ""){
-    path = `deployments/monthly-release/${monthly_release}`
+    if( task_path != ""){
+    path = `${task_path}/${monthly_release}`
     set_output_job(path)
-    } else if( adhoc != "" ){
-        path = `deployments/adhoc-tasks/${adhoc}`
-        set_output_job(path)
     } else {
         core.setOutput("jobs", []);
     }
