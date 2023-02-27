@@ -4,6 +4,9 @@ inputs:
   github-token:  # id of input
     description: 'The repository token, i.e. secrets.GITHUB_TOKEN'
     required: true
+  task-path:
+    description: 'Path to FP, i.e. deployments/monthly-release'
+    required: false
   labels:  # id of input
     description: "The array of label name, e.g. '[\"label-1\", \"label-2\"]'"
     required: false
