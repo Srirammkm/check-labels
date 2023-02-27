@@ -92,7 +92,7 @@ async function run() {
     }
 
     if( task_path != ""){
-    path = `${task_path}/${monthly_release}`
+    path = `${task_path}`
     set_output_job(path)
     } else {
         core.setOutput("jobs", []);
