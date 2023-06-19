@@ -6,6 +6,8 @@ const YAML = require('yamljs');
 async function run() { 
     const token =  core.getInput("github-token", { required: true });
     const task_path = core.getInput("task-path", { required: false });
+    const is_adhoc = core.getInput("is-adhoc", { required: false });
+    const task_name = core.getInput("task-name", { required: false });
     const octokit = github.getOctokit(token);
 
     const labelNames = await getPullRequestLabelNames(octokit);
@@ -94,6 +96,11 @@ async function run() {
     if( task_path != ""){
     path = `${task_path}`
     set_output_job(path)
+    } else if ( is_adhoc === "true") {
+        const lst = [];
+        jobs = get_task_content(task_name)
+        lst.push(jobs)
+        core.setOutput("jobs", lst);
     } else {
         core.setOutput("jobs", []);
     }

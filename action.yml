@@ -7,6 +7,12 @@ inputs:
   task-path:
     description: 'Path to FP, i.e. deployments/monthly-release'
     required: false
+  is-adhoc:
+    description: 'Boolean for adhoc task'
+    required: false
+  task-name:
+    description: 'Task Name, for now to filter adhoc task, i.e. file name update-alerts.sh'
+    required: false
   labels:  # id of input
     description: "The array of label name, e.g. '[\"label-1\", \"label-2\"]'"
     required: false
